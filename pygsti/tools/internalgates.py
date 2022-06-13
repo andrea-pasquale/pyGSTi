@@ -285,6 +285,57 @@ def standard_gatename_unitaries():
 
     return std_unitaries
 
+def standard_gatenames_qibo_conversions():
+    """
+    #TODO: update docstring
+    A dictionary converting the gates with standard names to the qibo names for these gates.
+
+    See :function:`standard_gatename_unitaries`.
+
+    By default, an idle operation will not be converted to a gate.
+    If you want an idle to be converted to a `cirq.WaitGate`, you will have
+    to modify this dictionary.
+
+    Note that throughout pyGSTi the standard gatenames (e.g., 'Gh' for Hadamard)
+    are not enforced to correspond to the expected unitaries. So, if the user
+    as, say, defined 'Gh' to be something other than the Hadamard gate this
+    conversion dictionary will be incorrect.
+
+    Currently there are some standard gate names with no conversion to cirq.
+
+    TODO: add Clifford gates with
+    https://cirq.readthedocs.io/en/latest/generated/cirq.SingleQubitCliffordGate.html
+
+    Returns
+    -------
+    dict mapping strings to string
+    """
+    try:
+        import qibo
+    except ImportError:
+        raise ImportError("Cirq is required for this operation, and it does not appear to be installed.")
+
+    std_gatenames_to_cirq = {}
+    std_gatenames_to_cirq['Gi'] = (qibo.gates.I, None)
+    std_gatenames_to_cirq['Gxpi2'] = (qibo.gates.RX, _np.pi/2)
+    std_gatenames_to_cirq['Gxmpi2'] = (qibo.gates.RX, -_np.pi/2)
+    std_gatenames_to_cirq['Gxpi'] = (qibo.gates.RX, _np.pi)
+    std_gatenames_to_cirq['Gzpi2'] = (qibo.gates.RZ, _np.pi/2)
+    std_gatenames_to_cirq['Gzmpi2'] = (qibo.gates.RZ, -_np.pi/2)
+    std_gatenames_to_cirq['Gzpi'] = (qibo.gates.RZ, _np.pi)
+    std_gatenames_to_cirq['Gypi2'] = (qibo.gates.RY, _np.pi/2)
+    std_gatenames_to_cirq['Gympi2'] = (qibo.gates.RY, -_np.pi/2)
+    std_gatenames_to_cirq['Gypi'] = (qibo.gates.RY, _np.pi)
+    std_gatenames_to_cirq['Gp'] = std_gatenames_to_cirq['Gzpi2']
+    std_gatenames_to_cirq['Gpdag'] = std_gatenames_to_cirq['Gzmpi2']
+    std_gatenames_to_cirq['Gh'] = (qibo.gates.H, None)
+    std_gatenames_to_cirq['Gt'] = (qibo.gates.T, None)
+    std_gatenames_to_cirq['Gtdag'] = (qibo.gates.TDG, None)
+    std_gatenames_to_cirq['Gcphase'] = (qibo.gates.CZ, None)
+    std_gatenames_to_cirq['Gcnot'] = (qibo.gates.CNOT, None)
+    std_gatenames_to_cirq['Gswap'] = (qibo.gates.SWAP, None)
+
+    return std_gatenames_to_cirq
 
 def standard_gatenames_cirq_conversions():
     """

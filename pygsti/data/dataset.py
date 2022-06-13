@@ -1597,6 +1597,36 @@ class DataSet(object):
         self._add_raw_arrays(circuit, outcome_index_array, time_array, count_array,
                              overwriteExisting, record_zero_counts, aux)
 
+    def add_qibo_trial_result(self, circuit, trial_result):
+        """
+        #TODO: update docstring
+        Add a single circuit's counts --- stored in a Cirq TrialResult --- to this DataSet
+
+        Parameters
+        ----------
+        circuit : tuple or Circuit
+            A tuple of operation labels specifying the circuit or a Circuit object.
+            Note that this must be a PyGSTi circuit --- not a Cirq circuit.
+
+        trial_result : cirq.TrialResult
+            The TrialResult to add
+
+        Returns
+        -------
+        None
+        """
+
+        try:
+            import qibo
+        except ImportError:
+            raise ImportError("Qibo is required for this operation, and it does not appear to be installed.")
+
+        # TrialResult.histogram returns a collections.Counter object, which is a subclass of dict.
+        histogram_counter = trial_result.frequencies()
+        # The keys in histogram_counter are integers, but pyGSTi likes dictionary keys to be strings.
+        count_dict = {str(key): value for key, value in histogram_counter.items()}
+        self.add_count_dict(circuit, count_dict)
+
     def add_cirq_trial_result(self, circuit, trial_result, key):
         """
         Add a single circuit's counts --- stored in a Cirq TrialResult --- to this DataSet

@@ -3627,6 +3627,56 @@ class Circuit(object):
         f.write("\end{document}")
         f.close()
 
+    def convert_to_qibo(self,
+                    gatename_conversion=None,
+                    idle_gate_name='Gi'):
+        """
+        #TODO: update docstring
+        Converts this circuit to a Cirq circuit.
+
+        Parameters
+        ----------
+
+        gatename_conversion : dict, optional
+            If not None, a dictionary that converts the gatenames in the circuit to the
+            Qibo gates that will appear in the Qibo circuit. If only standard pyGSTi names
+            are used (e.g., 'Gh', 'Gp', 'Gcnot', 'Gcphase', etc) this dictionary need not
+            be specified, and an automatic conversion to the standard Cirq names will be
+            implemented.
+        idle_gate_name : str, optional
+            Name to use for idle gates. Defaults to 'Gi'
+
+        Returns
+        -------
+        A Cirq Circuit object.
+        """
+
+        try:
+            import qibo
+        except ImportError:
+            raise ImportError("Qibo is required for this operation, and it does not appear to be installed.")
+
+        if gatename_conversion is None:
+            gatename_conversion = _itgs.standard_gatenames_qibo_conversions()
+            # if wait_duration is not None:
+            #     gatename_conversion[idle_gate_name] = cirq.WaitGate(wait_duration)
+        qibo_gates = []
+        nqubits = 1
+        for i in range(self.num_layers):
+            layer = self.layer_with_idles(i, idle_gate_name)
+            for gate in layer:
+                operation, parameters = gatename_conversion[gate.name]
+                #qubits = map(qubit_conversion.get, gate.qubits)
+                nqubits = len(gate.qubits)  if nqubits < len(gate.qubits) else nqubits
+                if parameters is None:
+                    qibo_gates.append(operation(*gate.qubits))
+                else:
+                    qibo_gates.append(operation(*gate.qubits, parameters))
+
+        circuit = qibo.models.Circuit(nqubits)
+        circuit.add(qibo_gates)
+        return circuit
+
     def convert_to_cirq(self,
                         qubit_conversion,
                         wait_duration=None,
